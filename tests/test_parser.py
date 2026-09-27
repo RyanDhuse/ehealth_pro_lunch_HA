@@ -105,6 +105,25 @@ def test_parse_day_category_ordering():
     assert "Apple" in day.sections.get("Fruit", [])
 
 
+def test_parse_day_string_recipe_ids():
+    """Recipe IDs sent as strings are kept, as ints, in display order."""
+    # Trimmed from the real 2026-09-30 record for Bellevue SD elementary lunch
+    # (org 99, menu 130572): an edited day that mixes string and int IDs.
+    setting = {
+        "current_display": [
+            {"item": "cust_featured_entree(s)", "weight": 0, "name": "Featured Entree(s)", "type": "category"},
+            {"item": "1490667", "weight": 1, "name": "Macaroni & Cheese with Wheat Roll", "type": "recipe"},
+            {"item": "cust_daily_choices", "weight": 2, "name": "Daily Choices", "type": "category"},
+            {"item": 25093, "weight": 3, "name": "Chicken Burger", "type": "recipe"},
+        ],
+        "days_off": [],
+    }
+    record = {"day": "2026-09-30", "setting": json.dumps(setting), "overwritten": True}
+    day = parse_day(record, MEAL_TYPE_LUNCH)
+    assert day.recipe_ids == [1490667, 25093]
+    assert day.entrees == ["Macaroni & Cheese with Wheat Roll"]
+
+
 # ── Month parsing ─────────────────────────────────────────────────────────────
 
 def test_parse_month(april_overwrites):

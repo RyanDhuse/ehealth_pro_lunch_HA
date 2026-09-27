@@ -103,6 +103,11 @@ def parse_day(record: dict, meal_type_id: int = MEAL_TYPE_LUNCH) -> MenuDay:
                 sections[current_section] = []
         elif item_type == "recipe":
             sections.setdefault(current_section, []).append(name)
+            # The API sends recipe IDs sometimes as ints (25141) and sometimes
+            # as strings ("25141"), even for the same recipe. Strings appear in
+            # days edited after the menu was published.
+            if isinstance(raw_item, str) and raw_item.isdigit():
+                raw_item = int(raw_item)
             if isinstance(raw_item, int):
                 recipe_ids.append(raw_item)
         elif item_type == "text" and name:
