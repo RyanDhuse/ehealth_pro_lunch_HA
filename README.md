@@ -7,7 +7,7 @@ Works for **any school district** using Health-e Pro's public menu system — ju
 ## Installation via HACS
 
 1. In HACS → Integrations → ⋮ (top right) → **Custom repositories**
-2. Add: `https://github.com/kane9287/healthepro-menu-ha` — Category: **Integration**
+2. Add: `https://github.com/kane9287/ehealth_pro_lunch_HA` — Category: **Integration**
 3. Install **Health-e Pro Menu**
 4. Restart Home Assistant
 
@@ -91,4 +91,4 @@ Currently supports **Health-e Pro** (`menus.healthepro.com`). Designed with a ve
 
 ## Contributing
 
-Issues and PRs welcome at [github.com/kanecb89/healthepro-menu-ha](https://github.com/kanecb89/healthepro-menu-ha).
+Issues and PRs welcome at [github.com/kane9287/ehealth_pro_lunch_HA](https://github.com/kane9287/ehealth_pro_lunch_HA).
