@@ -93,13 +93,14 @@ def _async_get_clientsession(hass):
 
 # Register all stubs
 _stub("homeassistant", HomeAssistant=_HomeAssistant)
-_stub("homeassistant.core", HomeAssistant=_HomeAssistant)
+_stub("homeassistant.core", HomeAssistant=_HomeAssistant, callback=lambda f: f)
 _stub("homeassistant.config_entries",
       ConfigEntry=_ConfigEntry, ConfigFlow=_ConfigFlow, OptionsFlow=_OptionsFlow)
 _stub("homeassistant.helpers")
 _stub("homeassistant.helpers.aiohttp_client",
       async_get_clientsession=_async_get_clientsession)
 _stub("homeassistant.helpers.entity", DeviceInfo=_DeviceInfo)
+_stub("homeassistant.helpers.event", async_track_time_change=None)
 _stub("homeassistant.helpers.entity_platform", AddEntitiesCallback=None)
 _stub("homeassistant.helpers.update_coordinator",
       DataUpdateCoordinator=_DataUpdateCoordinator,
