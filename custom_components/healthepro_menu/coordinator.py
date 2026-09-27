@@ -48,6 +48,8 @@ def _parse_recipe(raw: dict) -> RecipeDetail:
         attributes=attributes,
         calories=calories,
         category=category,
+        image_url=raw.get("image_path") or None,
+        updated_at=raw.get("updated_at"),
     )
 
 

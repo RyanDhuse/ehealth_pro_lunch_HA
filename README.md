@@ -36,6 +36,27 @@ Three sensors are created per configured menu:
 | `sensor.*_tomorrow` | Tomorrow's entrÃ©es or "No school" | same |
 | `sensor.*_month` | "N days loaded" | `days` (full list), `published_months` |
 
+### Recipe photos
+
+With **Include recipe details** on, each recipe the district has a photo for gets an `image` entity, for the week being served: Monday to Friday of this week, or of the coming week on weekends. A recipe served on several days has one entity. Entities are added and removed as the week changes, so there are typically 20–40 per menu.
+
+| Entity | State | Attributes |
+| --- | --- | --- |
+| `image.*_<recipe name>` | When the photo last changed | `recipe_id`, `menu_name` (exactly as in `sections`), `category` |
+
+Photos are downloaded by Home Assistant and cached, and are only downloaded again when the district updates the recipe.
+
+Home Assistant rotates every image entity's access token every 5 minutes, and each rotation writes a history row. To keep these out of the recorder:
+
+```yaml
+recorder:
+  exclude:
+    entity_globs:
+      - image.*_lunch_*
+```
+
+Adjust the glob to match your entity IDs.
+
 ## Lovelace example
 
 ```yaml
@@ -56,6 +77,20 @@ content: |
   {% endif %}
 ```
 
+Today's featured entrées with their photos (needs **Include recipe details**):
+
+```yaml
+type: markdown
+content: |
+  {% set s = 'sensor.elementary_schools_elementary_lunch_2025_26_today' %}
+  {% set photos = expand(device_entities(device_id(s)) | select('match', 'image\.')) %}
+  {% for item in state_attr(s, 'entrees') or [] %}
+  {% set p = photos | selectattr('attributes.menu_name', 'eq', item) | first %}
+  **{{ item }}**
+  {% if p %}![{{ item }}]({{ p.attributes.entity_picture }}){% endif %}
+  {% endfor %}
+```
+
 ## Options
 
 After setup, click **Configure** on the integration:
@@ -64,7 +99,7 @@ After setup, click **Configure** on the integration:
 | --- | --- | --- |
 | Refresh interval | 24 hours | How often to poll Health-e Pro |
 | Prefetch next month | On | Load next month in advance |
-| Include recipe details | Off | Fetch allergens & nutrition (extra API calls) |
+| Include recipe details | Off | Fetch allergens, nutrition and recipe photos (extra API calls) |
 | Include prices | Off | Fetch meal pricing |
 | Include sidebars | Off | Fetch announcements |
 

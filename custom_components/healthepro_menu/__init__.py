@@ -11,7 +11,7 @@ from .coordinator import HealtheProCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor", "calendar"]
+PLATFORMS = ["sensor", "calendar", "image"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

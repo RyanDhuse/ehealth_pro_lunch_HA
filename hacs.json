@@ -2,5 +2,5 @@
   "name": "Health-e Pro Menu",
   "content_in_root": false,
   "render_readme": true,
-  "homeassistant": "2023.4.0"
+  "homeassistant": "2023.7.0"
 }

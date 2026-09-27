@@ -2,6 +2,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date, timedelta
+
+
+def week_dates(today: date) -> list[date]:
+    """Monday to Friday of this week, or of the coming week on weekends."""
+    monday = today - timedelta(days=today.weekday())
+    if today.weekday() >= 5:
+        monday += timedelta(days=7)
+    return [monday + timedelta(days=i) for i in range(5)]
 
 
 @dataclass
@@ -12,6 +21,10 @@ class RecipeDetail:
     attributes: list[str]
     calories: float | None
     category: str | None
+    # Photo URL is signed and expires 24 hours after the API returns it.
+    # Kept out of to_dict(): image entities expose photos, not attributes.
+    image_url: str | None = None
+    updated_at: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -34,6 +47,8 @@ class MenuDay:
     recipe_ids: list[int]
     notes: list[str]
     recipes: dict[int, RecipeDetail] = field(default_factory=dict)
+    # Recipe ID -> name exactly as the menu displays it (matches `sections`).
+    recipe_names: dict[int, str] = field(default_factory=dict)
 
     @property
     def allergens(self) -> list[str]:
@@ -98,3 +113,20 @@ class SchoolMenuData:
                 if day:
                     return day
         return None
+
+    def week_photos(self, today: date) -> dict[int, tuple[RecipeDetail, str]]:
+        """Recipes with a photo served in the week shown for `today`.
+
+        Maps recipe ID -> (recipe, name as the menu displays it), in the order
+        items first appear. A recipe served on several days appears once.
+        """
+        photos: dict[int, tuple[RecipeDetail, str]] = {}
+        for d in week_dates(today):
+            day = self.get_day(d.isoformat())
+            if day is None or day.off_day:
+                continue
+            for rid in day.recipe_ids:
+                recipe = day.recipes.get(rid)
+                if rid not in photos and recipe and recipe.image_url:
+                    photos[rid] = (recipe, day.recipe_names.get(rid, recipe.name))
+        return photos

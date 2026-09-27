@@ -89,6 +89,7 @@ def parse_day(record: dict, meal_type_id: int = MEAL_TYPE_LUNCH) -> MenuDay:
 
     sections: dict[str, list[str]] = {}
     recipe_ids: list[int] = []
+    recipe_names: dict[int, str] = {}
     notes: list[str] = []
     current_section = "_uncategorized"
 
@@ -110,6 +111,7 @@ def parse_day(record: dict, meal_type_id: int = MEAL_TYPE_LUNCH) -> MenuDay:
                 raw_item = int(raw_item)
             if isinstance(raw_item, int):
                 recipe_ids.append(raw_item)
+                recipe_names[raw_item] = name
         elif item_type == "text" and name:
             notes.append(name)
 
@@ -131,6 +133,7 @@ def parse_day(record: dict, meal_type_id: int = MEAL_TYPE_LUNCH) -> MenuDay:
         sections={k: v for k, v in sections.items() if k != "_uncategorized"},
         recipe_ids=recipe_ids,
         notes=notes,
+        recipe_names=recipe_names,
     )
 
 
