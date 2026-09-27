@@ -5,12 +5,15 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 
-def week_dates(today: date) -> list[date]:
-    """Monday to Friday of this week, or of the coming week on weekends."""
-    monday = today - timedelta(days=today.weekday())
-    if today.weekday() >= 5:
-        monday += timedelta(days=7)
-    return [monday + timedelta(days=i) for i in range(5)]
+PHOTO_DAYS = 7
+
+
+def upcoming_dates(today: date) -> list[date]:
+    """Today and the following days that get recipe photos.
+
+    Seven days always include the next school day, apart from breaks.
+    """
+    return [today + timedelta(days=i) for i in range(PHOTO_DAYS)]
 
 
 @dataclass
@@ -114,14 +117,14 @@ class SchoolMenuData:
                     return day
         return None
 
-    def week_photos(self, today: date) -> dict[int, tuple[RecipeDetail, str]]:
-        """Recipes with a photo served in the week shown for `today`.
+    def upcoming_photos(self, today: date) -> dict[int, tuple[RecipeDetail, str]]:
+        """Recipes with a photo served from `today` through the next week.
 
         Maps recipe ID -> (recipe, name as the menu displays it), in the order
         items first appear. A recipe served on several days appears once.
         """
         photos: dict[int, tuple[RecipeDetail, str]] = {}
-        for d in week_dates(today):
+        for d in upcoming_dates(today):
             day = self.get_day(d.isoformat())
             if day is None or day.off_day:
                 continue

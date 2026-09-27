@@ -1,4 +1,4 @@
-"""Tests for picking the week's recipe photos."""
+"""Tests for picking upcoming recipe photos."""
 from __future__ import annotations
 
 import json
@@ -10,7 +10,7 @@ from custom_components.healthepro_menu.models import (
     MenuMonth,
     RecipeDetail,
     SchoolMenuData,
-    week_dates,
+    upcoming_dates,
 )
 from custom_components.healthepro_menu.parser import parse_day
 
@@ -40,18 +40,14 @@ def _data(days: list[MenuDay]) -> SchoolMenuData:
     )
 
 
-def test_week_dates_on_a_weekday_is_this_week():
-    assert week_dates(date(2026, 9, 30)) == [date(2026, 9, d) for d in range(28, 31)] + [
-        date(2026, 10, 1), date(2026, 10, 2)
-    ]
+def test_upcoming_dates_are_today_and_the_next_six_days():
+    dates = upcoming_dates(date(2026, 10, 2))  # a Friday
+    assert dates[0] == date(2026, 10, 2)
+    assert dates[-1] == date(2026, 10, 8)
+    assert date(2026, 10, 5) in dates  # the next school day, Monday
 
 
-def test_week_dates_on_a_weekend_is_the_coming_week():
-    assert week_dates(date(2026, 9, 27))[0] == date(2026, 9, 28)  # Sunday
-    assert week_dates(date(2026, 9, 26))[0] == date(2026, 9, 28)  # Saturday
-
-
-def test_week_photos_dedupes_and_skips_missing_photos_and_off_days():
+def test_upcoming_photos_dedupes_and_skips_missing_photos_and_off_days():
     burger = _recipe(1, "Chicken Burger")
     mac = _recipe(2, "Mac & Cheese")
     fruit = _recipe(3, "Grapes", image_url=None)
@@ -60,10 +56,10 @@ def test_week_photos_dedupes_and_skips_missing_photos_and_off_days():
         _day("2026-09-28", [mac, burger, fruit]),
         _day("2026-09-29", [burger]),
         _day("2026-09-30", [nachos], off_day=True),
-        _day("2026-10-05", [nachos]),  # next week
+        _day("2026-10-05", [nachos]),  # past the 7-day window
     ])
 
-    photos = data.week_photos(date(2026, 9, 29))
+    photos = data.upcoming_photos(date(2026, 9, 28))
 
     assert list(photos) == [2, 1]
     assert photos[2] == (mac, "Mac & Cheese (menu)")

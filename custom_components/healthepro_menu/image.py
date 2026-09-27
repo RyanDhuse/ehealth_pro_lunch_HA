@@ -1,4 +1,4 @@
-"""Image entities for Health-e Pro Menu: one per recipe photo in the week."""
+"""Image entities for Health-e Pro Menu: one per upcoming recipe photo."""
 from __future__ import annotations
 
 from homeassistant.components.image import ImageEntity
@@ -26,9 +26,9 @@ async def async_setup_entry(
 
     @callback
     def _sync() -> None:
-        """Match entities to the recipes with photos in the displayed week."""
+        """Match entities to the recipes with photos in the coming days."""
         data = coordinator.data
-        wanted = data.week_photos(dt_util.now().date()) if enabled and data else {}
+        wanted = data.upcoming_photos(dt_util.now().date()) if enabled and data else {}
 
         for rid, (recipe, menu_name) in wanted.items():
             if rid in entities:
@@ -42,7 +42,7 @@ async def async_setup_entry(
         if new:
             async_add_entities(new.values())
 
-        # Remove photos that left the week, including ones registered by a
+        # Remove photos no longer upcoming, including ones registered by a
         # previous run, so entities don't pile up over the school year.
         wanted_ids = {_unique_id(entry, rid) for rid in wanted}
         registry = er.async_get(hass)
