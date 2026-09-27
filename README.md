@@ -38,24 +38,13 @@ Three sensors are created per configured menu:
 
 ### Recipe photos
 
-With **Include recipe details** on, each recipe the district has a photo for gets an `image` entity, for the week being served: Monday to Friday of this week, or of the coming week on weekends. A recipe served on several days has one entity. Entities are added and removed as the week changes, so there are typically 20–40 per menu.
+With **Include recipe details** on, each recipe the district has a photo for gets an `image` entity, for today and the next 6 days, which always includes the next school day apart from long breaks. A recipe served on several days has one entity. Entities are added and removed as the days move on, so there are typically 20â€“40 per menu.
 
 | Entity | State | Attributes |
 | --- | --- | --- |
 | `image.*_<recipe name>` | When the photo last changed | `recipe_id`, `menu_name` (exactly as in `sections`), `category` |
 
 Photos are downloaded by Home Assistant and cached, and are only downloaded again when the district updates the recipe.
-
-Home Assistant rotates every image entity's access token every 5 minutes, and each rotation writes a history row. To keep these out of the recorder:
-
-```yaml
-recorder:
-  exclude:
-    entity_globs:
-      - image.*_lunch_*
-```
-
-Adjust the glob to match your entity IDs.
 
 ## Lovelace example
 
@@ -77,7 +66,7 @@ content: |
   {% endif %}
 ```
 
-Today's featured entrées with their photos (needs **Include recipe details**):
+Today's featured entrÃ©es with their photos (needs **Include recipe details**):
 
 ```yaml
 type: markdown
@@ -85,11 +74,13 @@ content: |
   {% set s = 'sensor.elementary_schools_elementary_lunch_2025_26_today' %}
   {% set photos = expand(device_entities(device_id(s)) | select('match', 'image\.')) %}
   {% for item in state_attr(s, 'entrees') or [] %}
-  {% set p = photos | selectattr('attributes.menu_name', 'eq', item) | first %}
+  {% set p = photos | selectattr('attributes.menu_name', 'eq', item) | list %}
   **{{ item }}**
-  {% if p %}![{{ item }}]({{ p.attributes.entity_picture }}){% endif %}
+  {% if p %}![{{ item }}]({{ p[0].attributes.entity_picture }}){% endif %}
   {% endfor %}
 ```
+
+The markdown card renders templates in strict mode, where `| first` on an empty list is an error, so the example takes a `list` and checks it.
 
 ## Options
 
